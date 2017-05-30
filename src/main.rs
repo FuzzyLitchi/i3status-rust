@@ -38,17 +38,13 @@ use std::ops::DerefMut;
 
 use block::Block;
 
-use blocks::create_block;
 use input::{process_events, I3barEvent};
 use scheduler::{UpdateScheduler, Task};
 use themes::get_theme;
 use config::Config;
 use icons::get_icons;
 
-use util::get_file;
-
 use self::clap::{Arg, App};
-use self::serde_json::Value;
 
 fn main() {
     let mut builder = App::new("i3status-rs")

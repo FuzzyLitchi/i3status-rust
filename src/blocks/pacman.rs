@@ -30,7 +30,7 @@ impl Pacman {
 }
 
 fn run_command(var: &str) {
-    Command::new("sh").args(&["-c", var]).spawn();
+    Command::new("sh").args(&["-c", var]).spawn().unwrap();
 }
 
 fn has_fake_root() -> bool {
