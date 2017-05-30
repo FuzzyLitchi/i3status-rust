@@ -27,25 +27,25 @@ impl Toggle {
             let id = Uuid::new_v4().simple().to_string();
             let interval = get_f64_default!(config, "interval", -1.);
             Toggle {
-                text: ButtonWidget::new(theme.clone(), &id)
-                    .with_text(&get_str!(config, "text")),
+                text: ButtonWidget::new(theme.clone(), &id).with_text(&get_str!(config, "text")),
                 command_on: get_str!(config, "command_on"),
                 command_off: get_str!(config, "command_off"),
                 command_state: get_str!(config, "command_state"),
                 id,
                 toggled: false,
-                update_interval: if interval < 0.
-                    {None} else
-                {Some(Duration::new(interval as u64, 0))},
+                update_interval: if interval < 0. {
+                    None
+                } else {
+                    Some(Duration::new(interval as u64, 0))
+                },
             }
         }
-        
+
     }
 }
 
 
-impl Block for Toggle
-{
+impl Block for Toggle {
     fn update(&mut self) -> Option<Duration> {
         let output = Command::new("sh")
             .args(&["-c", &self.command_state])
@@ -53,10 +53,17 @@ impl Block for Toggle
             .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_owned())
             .unwrap_or_else(|e| e.description().to_owned());
 
-        self.text.set_icon(match output.trim_left() {
-            "" => {self.toggled = false; "toggle_off"},
-            _ => {self.toggled = true; "toggle_on"}
-        });
+        self.text
+            .set_icon(match output.trim_left() {
+                          "" => {
+                              self.toggled = false;
+                              "toggle_off"
+                          }
+                          _ => {
+                              self.toggled = true;
+                              "toggle_on"
+                          }
+                      });
 
         self.update_interval
     }
@@ -71,7 +78,7 @@ impl Block for Toggle
                         self.toggled = false;
                         self.text.set_icon("toggle_off");
                         &self.command_off
-                    },
+                    }
                     false => {
                         self.toggled = true;
                         self.text.set_icon("toggle_on");
@@ -79,9 +86,7 @@ impl Block for Toggle
                     }
                 };
 
-                Command::new("sh")
-                    .args(&["-c", cmd])
-                    .output().ok();
+                Command::new("sh").args(&["-c", cmd]).output().ok();
             }
         }
     }

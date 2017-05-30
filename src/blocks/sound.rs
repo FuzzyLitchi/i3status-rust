@@ -16,7 +16,7 @@ pub struct Sound {
     text: ButtonWidget,
     id: String,
     update_interval: Duration,
-    theme: Value
+    theme: Value,
 }
 
 impl Sound {
@@ -36,8 +36,7 @@ impl Sound {
 // To filter [100%] output from amixer into 100
 const FILTER: &[char] = &['[', ']', '%'];
 
-impl Block for Sound
-{
+impl Block for Sound {
     fn update(&mut self) -> Option<Duration> {
         let output = Command::new("amixer")
             .args(&["get", "Master"])
@@ -45,9 +44,13 @@ impl Block for Sound
             .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_owned());
 
         if let Ok(output) = output {
-            let last = (&output).lines()
-                .into_iter().last().unwrap()
-                .split_whitespace().into_iter()
+            let last = (&output)
+                .lines()
+                .into_iter()
+                .last()
+                .unwrap()
+                .split_whitespace()
+                .into_iter()
                 .filter(|x| x.starts_with('[') && !x.contains("dB"))
                 .map(|s| s.trim_matches(FILTER))
                 .collect::<Vec<&str>>();
@@ -56,20 +59,24 @@ impl Block for Sound
             let muted = match last[1] {
                 "on" => false,
                 "off" => true,
-                _ => false
+                _ => false,
             };
 
             if muted {
                 self.text.set_icon("volume_empty");
-                self.text.set_text(self.theme["icons"]["volume_muted"]
-                    .as_str().expect("Wrong icon identifier!").to_owned());
+                self.text
+                    .set_text(self.theme["icons"]["volume_muted"]
+                                  .as_str()
+                                  .expect("Wrong icon identifier!")
+                                  .to_owned());
                 self.text.set_state(State::Warning);
             } else {
-                self.text.set_icon(match volume {
-                    0 ... 20 => "volume_empty",
-                    20 ... 70 => "volume_half",
-                    _ => "volume_full"
-                });
+                self.text
+                    .set_icon(match volume {
+                                  0...20 => "volume_empty",
+                                  20...70 => "volume_half",
+                                  _ => "volume_full",
+                              });
                 self.text.set_text(format!("{:02}%", volume));
                 self.text.set_state(State::Info);
             }
@@ -89,8 +96,9 @@ impl Block for Sound
         if let Some(ref name) = e.name {
             if name.as_str() == self.id {
                 Command::new("amixer")
-                .args(&["set", "Master", "toggle"])
-                .output().ok();
+                    .args(&["set", "Master", "toggle"])
+                    .output()
+                    .ok();
                 self.update();
             }
         }

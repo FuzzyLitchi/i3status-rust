@@ -11,7 +11,8 @@ use std::io::Read;
 pub fn get_file(name: &str) -> String {
     let mut file_contents = String::new();
     let mut file = File::open(name).expect(&format!("Unable to open {}", name));
-    file.read_to_string(&mut file_contents).expect(&format!("Unable to read {}", name));
+    file.read_to_string(&mut file_contents)
+        .expect(&format!("Unable to read {}", name));
     file_contents
 }
 
@@ -29,7 +30,7 @@ macro_rules! map (
 
 struct PrintState {
     pub last_bg: Value,
-    pub has_predecessor: bool
+    pub has_predecessor: bool,
 }
 
 impl PrintState {
@@ -44,7 +45,7 @@ impl PrintState {
 pub fn print_blocks(order: &Vec<String>, block_map: &HashMap<String, &mut Block>, theme: &Value) {
     let mut state = PrintState {
         has_predecessor: false,
-        last_bg: Value::Null
+        last_bg: Value::Null,
     };
 
     print!("[");
@@ -55,11 +56,25 @@ pub fn print_blocks(order: &Vec<String>, block_map: &HashMap<String, &mut Block>
         let color = String::from(first.get_rendered()["background"].as_str().unwrap());
 
         // TODO: clean this up
-        let tmp: Value = theme.get("separator_fg").expect("separator_fg entry is missing").clone();
-        let sep_fg:Value= if tmp.as_str().unwrap() == "auto".to_string() {Value::String(color.clone())} else {tmp};
+        let tmp: Value = theme
+            .get("separator_fg")
+            .expect("separator_fg entry is missing")
+            .clone();
+        let sep_fg: Value = if tmp.as_str().unwrap() == "auto".to_string() {
+            Value::String(color.clone())
+        } else {
+            tmp
+        };
 
-        let tmp = theme.get("separator_bg").expect("separator_bg entry is missing").clone();
-        let sep_bg = if tmp.as_str().unwrap() == "auto".to_string() {state.last_bg.clone()} else {tmp};
+        let tmp = theme
+            .get("separator_bg")
+            .expect("separator_bg entry is missing")
+            .clone();
+        let sep_bg = if tmp.as_str().unwrap() == "auto".to_string() {
+            state.last_bg.clone()
+        } else {
+            tmp
+        };
 
         let separator = json!({
                     "full_text": theme["separator"],
@@ -77,7 +92,9 @@ pub fn print_blocks(order: &Vec<String>, block_map: &HashMap<String, &mut Block>
         for widget in widgets.iter().skip(1) {
             print!("{}{}", if state.has_predecessor { "," } else { "" },
                    widget.to_string());
-            state.set_last_bg(Value::String(String::from(widget.get_rendered()["background"].as_str().unwrap())));
+            state.set_last_bg(Value::String(String::from(widget.get_rendered()["background"]
+                                                             .as_str()
+                                                             .unwrap())));
             state.set_predecessor(true);
         }
     }
@@ -94,33 +111,33 @@ pub enum FormatTemplate {
 
 
 impl FormatTemplate {
-    pub fn from_string(s: String) -> Result<FormatTemplate,std::string::FromUtf8Error> {
+    pub fn from_string(s: String) -> Result<FormatTemplate, std::string::FromUtf8Error> {
         let s_as_bytes = s.clone().into_bytes();
 
         //valid var tokens: {} containing any amount of alphanumericals
         let re = Regex::new(r"\{[a-zA-Z0-9]+?\}").unwrap();
 
-        let mut token_vec: Vec<FormatTemplate> =vec![];
+        let mut token_vec: Vec<FormatTemplate> = vec![];
         let mut start: usize = 0;
 
         for re_match in re.find_iter(&s) {
             if re_match.start() != start {
-                let str_vec : Vec<u8> =(&s_as_bytes)[start..re_match.start()].to_vec();
+                let str_vec: Vec<u8> = (&s_as_bytes)[start..re_match.start()].to_vec();
                 token_vec.push(FormatTemplate::Str(String::from_utf8(str_vec)?, None));
             }
             token_vec.push(FormatTemplate::Var(re_match.as_str().to_string(), None));
             start = re_match.end();
         }
-        let str_vec : Vec<u8> = (&s_as_bytes)[start..].to_vec();
-        token_vec.push(FormatTemplate::Str(String::from_utf8(str_vec)?,None));
+        let str_vec: Vec<u8> = (&s_as_bytes)[start..].to_vec();
+        token_vec.push(FormatTemplate::Str(String::from_utf8(str_vec)?, None));
         let mut template: FormatTemplate = match token_vec.pop() {
-            Some(token) => {token},
-            _ => FormatTemplate::Str("".to_string(), None)
+            Some(token) => token,
+            _ => FormatTemplate::Str("".to_string(), None),
         };
         while let Some(token) = token_vec.pop() {
             template = match token {
                 FormatTemplate::Str(s, _) => FormatTemplate::Str(s, Some(Box::new(template))),
-                FormatTemplate::Var(s, _) => FormatTemplate::Var(s, Some(Box::new(template)))
+                FormatTemplate::Var(s, _) => FormatTemplate::Var(s, Some(Box::new(template))),
             }
         }
         Ok(template)

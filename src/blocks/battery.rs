@@ -16,7 +16,7 @@ pub struct Battery {
     id: String,
     max_charge: u64,
     update_interval: Duration,
-    device_path: String
+    device_path: String,
 }
 
 impl Battery {
@@ -27,10 +27,11 @@ impl Battery {
                 max_charge: 0,
                 update_interval: Duration::new(get_u64_default!(config, "interval", 10), 0),
                 output: TextWidget::new(theme),
-                device_path: format!("/sys/class/power_supply/BAT{}/", get_u64_default!(config, "device", 0)),
+                device_path: format!("/sys/class/power_supply/BAT{}/",
+                                     get_u64_default!(config, "device", 0)),
             }
         }
-        
+
     }
 }
 
@@ -40,14 +41,14 @@ fn read_file(path: &str) -> String {
         .open(path)
         .expect(&format!("Your system does not support reading {}", path));
     let mut content = String::new();
-    f.read_to_string(&mut content).expect(&format!("Failed to read {}", path));
+    f.read_to_string(&mut content)
+        .expect(&format!("Failed to read {}", path));
     // Removes trailing newline
     content.pop();
     content
 }
 
-impl Block for Battery
-{
+impl Block for Battery {
     fn update(&mut self) -> Option<Duration> {
         // TODO: Check if charge_ always contains the right values, might be energy_ depending on firmware
 
@@ -55,17 +56,21 @@ impl Block for Battery
 
         // We only need to read max_charge once, shouldn't change
         if self.max_charge == 0 {
-            self.max_charge = read_file(&format!("{}charge_full", self.device_path)).parse::<u64>().unwrap();
+            self.max_charge = read_file(&format!("{}charge_full", self.device_path))
+                .parse::<u64>()
+                .unwrap();
         }
 
-        let current_charge = read_file(&format!("{}charge_now", self.device_path)).parse::<u64>().unwrap();
+        let current_charge = read_file(&format!("{}charge_now", self.device_path))
+            .parse::<u64>()
+            .unwrap();
         let current_percentage = ((current_charge as f64 / self.max_charge as f64) * 100.) as u64;
         let current_percentage = match current_percentage {
-            0 ... 100 => current_percentage,
+            0...100 => current_percentage,
             // We need to cap it at 100, because the kernel may report
             // charge_now same as charge_full_design when the battery
             // is full, leading to >100% charge.
-            _ => 100
+            _ => 100,
         };
 
         let state = read_file(&format!("{}status", self.device_path));
@@ -77,19 +82,21 @@ impl Block for Battery
             self.output.set_text(String::from(""));
         }
 
-        self.output.set_icon(match state.as_str() {
-            "Full" => "bat_full",
-            "Discharging" => "bat_discharging",
-            "Charging" => "bat_charging",
-            _ => "bat"
-        });
+        self.output
+            .set_icon(match state.as_str() {
+                          "Full" => "bat_full",
+                          "Discharging" => "bat_discharging",
+                          "Charging" => "bat_charging",
+                          _ => "bat",
+                      });
 
-        self.output.set_state(match current_percentage {
-            0 ... 15 => State::Critical,
-            15 ... 30 => State::Warning,
-            30 ... 60 => State::Info,
-            _ => State::Good
-        });
+        self.output
+            .set_state(match current_percentage {
+                           0...15 => State::Critical,
+                           15...30 => State::Warning,
+                           30...60 => State::Info,
+                           _ => State::Good,
+                       });
 
         Some(self.update_interval.clone())
     }

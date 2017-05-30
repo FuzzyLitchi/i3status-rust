@@ -39,7 +39,11 @@ use std::sync::mpsc::Sender;
 
 macro_rules! boxed ( { $b:expr } => { Box::new($b) as Box<Block> }; );
 
-pub fn create_block(name: &str, config: Value, tx_update_request: Sender<Task>, theme: &Value) -> Box<Block> {
+pub fn create_block(name: &str,
+                    config: Value,
+                    tx_update_request: Sender<Task>,
+                    theme: &Value)
+                    -> Box<Block> {
     match name {
         "time" => boxed!(Time::new(config, theme.clone())),
         "template" => boxed!(Template::new(config, tx_update_request, theme.clone())),

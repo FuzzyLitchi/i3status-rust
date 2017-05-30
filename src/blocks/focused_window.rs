@@ -48,25 +48,33 @@ impl FocusedWindow {
                     Event::WindowEvent(e) => {
                         match e.change {
                             WindowChange::Focus => {
-                                    if let Some(name) = e.container.name {
-                                        let mut title = title_original.lock().unwrap();
-                                        *title = name;
-                                        tx.send(Task {id: id_clone.clone(), update_time: Instant::now()}).unwrap();
-                                    }
-                                },
+                                if let Some(name) = e.container.name {
+                                    let mut title = title_original.lock().unwrap();
+                                    *title = name;
+                                    tx.send(Task {
+                                                  id: id_clone.clone(),
+                                                  update_time: Instant::now(),
+                                              })
+                                        .unwrap();
+                                }
+                            }
                             WindowChange::Title => {
                                 if e.container.focused {
                                     if let Some(name) = e.container.name {
                                         let mut title = title_original.lock().unwrap();
                                         *title = name;
-                                        tx.send(Task {id: id_clone.clone(), update_time: Instant::now()}).unwrap();
+                                        tx.send(Task {
+                                                      id: id_clone.clone(),
+                                                      update_time: Instant::now(),
+                                                  })
+                                            .unwrap();
                                     }
                                 }
                             }
                             _ => {}
                         };
                     }
-                    _ => unreachable!()
+                    _ => unreachable!(),
                 }
             }
         });
@@ -76,16 +84,15 @@ impl FocusedWindow {
                 id,
                 text: TextWidget::new(theme.clone()),
                 max_width: get_u64_default!(config, "max-width", 21) as usize,
-                title
+                title,
             }
         }
-        
+
     }
 }
 
 
-impl Block for FocusedWindow
-{
+impl Block for FocusedWindow {
     fn update(&mut self) -> Option<Duration> {
         let mut string = (*self.title.lock().unwrap()).clone();
         string.truncate(self.max_width);

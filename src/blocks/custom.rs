@@ -42,13 +42,18 @@ impl Custom {
         };
 
         if let Some(cycle) = config["cycle"].as_array() {
-            custom.cycle = Some(cycle.into_iter()
-                                .map(|s| s.as_str().expect("'cycle' should be an array of strings").to_string())
-                                .collect::<Vec<_>>()
-                                .into_iter()
-                                .cycle()
-                                .peekable());
-            return custom
+            custom.cycle = Some(cycle
+                                    .into_iter()
+                                    .map(|s| {
+                                             s.as_str()
+                                                 .expect("'cycle' should be an array of strings",)
+                                                 .to_string()
+                                         })
+                                    .collect::<Vec<_>>()
+                                    .into_iter()
+                                    .cycle()
+                                    .peekable());
+            return custom;
         };
 
         if let Some(command) = config["command"].as_str() {
@@ -61,8 +66,7 @@ impl Custom {
 
 impl Block for Custom {
     fn update(&mut self) -> Option<Duration> {
-        let command_str = self
-            .cycle
+        let command_str = self.cycle
             .as_mut()
             .map(|c| c.peek().cloned().unwrap_or("".to_owned()))
             .or(self.command.clone())
@@ -86,18 +90,16 @@ impl Block for Custom {
     fn click(&mut self, event: &I3barEvent) {
         if let Some(ref name) = event.name {
             if name != &self.id {
-                return
+                return;
             }
         } else {
-            return
+            return;
         }
 
         let mut update = false;
 
         if let Some(ref on_click) = self.on_click {
-            Command::new("sh")
-                .args(&["-c", on_click])
-                .output().ok();
+            Command::new("sh").args(&["-c", on_click]).output().ok();
             update = true;
         }
 
@@ -107,7 +109,12 @@ impl Block for Custom {
         }
 
         if update {
-            self.tx_update_request.send(Task { id: self.id.clone(), update_time: Instant::now() }).ok();
+            self.tx_update_request
+                .send(Task {
+                          id: self.id.clone(),
+                          update_time: Instant::now(),
+                      })
+                .ok();
         }
     }
 

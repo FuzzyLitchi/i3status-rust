@@ -7,7 +7,7 @@ use input::I3barEvent;
 
 use std::io::BufReader;
 use std::io::prelude::*;
-use std::fs::{File};
+use std::fs::File;
 
 use serde_json::Value;
 use uuid::Uuid;
@@ -26,20 +26,19 @@ impl Cpu {
         {
             let text = TextWidget::new(theme.clone()).with_icon("cpu");
             return Cpu {
-                id: Uuid::new_v4().simple().to_string(),
-                update_interval: Duration::new(get_u64_default!(config, "interval", 1), 0),
-                utilization: text,
-                prev_idle: 0,
-                prev_non_idle: 0,
-            }
+                       id: Uuid::new_v4().simple().to_string(),
+                       update_interval: Duration::new(get_u64_default!(config, "interval", 1), 0),
+                       utilization: text,
+                       prev_idle: 0,
+                       prev_non_idle: 0,
+                   };
         }
-        
+
     }
 }
 
 
-impl Block for Cpu
-{
+impl Block for Cpu {
     fn update(&mut self) -> Option<Duration> {
         let f = File::open("/proc/stat").expect("Your system doesn't support /proc/stat");
         let f = BufReader::new(f);
@@ -49,20 +48,21 @@ impl Block for Cpu
         for line in f.lines().scan((), |_, x| x.ok()) {
             if line.starts_with("cpu ") {
                 let data: Vec<u64> = (&line)
-                                        .split(" ")
-                                        .collect::<Vec<&str>>()
-                                        .iter().skip(2)
-                                        .filter_map(|x| x.parse::<u64>().ok())
-                                        .collect::<Vec<_>>();
+                    .split(" ")
+                    .collect::<Vec<&str>>()
+                    .iter()
+                    .skip(2)
+                    .filter_map(|x| x.parse::<u64>().ok())
+                    .collect::<Vec<_>>();
 
                 // idle = idle + iowait
-                let idle =  data[3] + data[4];
-                let non_idle =  data[0] + // user
+                let idle = data[3] + data[4];
+                let non_idle = data[0] + // user
                                 data[1] + // nice
                                 data[2] + // system
                                 data[5] + // irq
                                 data[6] + // softirq
-                                data[7];  // steal
+                                data[7]; // steal
 
                 let prev_total = self.prev_idle + self.prev_non_idle;
                 let total = idle + non_idle;
@@ -78,19 +78,21 @@ impl Block for Cpu
                 }
 
 
-                utilization = (((total_delta - idle_delta) as f64 / total_delta as f64) * 100.) as u64;
+                utilization = (((total_delta - idle_delta) as f64 / total_delta as f64) * 100.) as
+                              u64;
 
                 self.prev_idle = idle;
                 self.prev_non_idle = non_idle;
             }
         }
 
-        self.utilization.set_state(match utilization {
-            0 ... 30 => State::Idle,
-            30 ... 60 => State::Info,
-            60 ... 90 => State::Warning,
-            _ => State::Critical
-        });
+        self.utilization
+            .set_state(match utilization {
+                           0...30 => State::Idle,
+                           30...60 => State::Info,
+                           60...90 => State::Warning,
+                           _ => State::Critical,
+                       });
 
         self.utilization.set_text(format!("{:02}%", utilization));
 

@@ -5,7 +5,7 @@ use std::time::Duration;
 use block::Block;
 use self::chrono::offset::local::Local;
 use widgets::text::TextWidget;
-use widget::{I3BarWidget};
+use widget::I3BarWidget;
 use serde_json::Value;
 use uuid::Uuid;
 
@@ -14,7 +14,7 @@ pub struct Time {
     time: TextWidget,
     id: String,
     update_interval: Duration,
-    format: String
+    format: String,
 }
 
 impl Time {
@@ -31,7 +31,8 @@ impl Time {
 
 impl Block for Time {
     fn update(&mut self) -> Option<Duration> {
-        self.time.set_text(format!("{}", Local::now().format(&self.format)));
+        self.time
+            .set_text(format!("{}", Local::now().format(&self.format)));
         Some(self.update_interval.clone())
     }
 

@@ -31,8 +31,8 @@ impl cmp::Ord for Task {
 }
 
 
-pub struct UpdateScheduler  {
-    schedule: BinaryHeap<Task>
+pub struct UpdateScheduler {
+    schedule: BinaryHeap<Task>,
 }
 
 impl UpdateScheduler {
@@ -42,14 +42,12 @@ impl UpdateScheduler {
         let now = Instant::now();
         for block in blocks.iter() {
             schedule.push(Task {
-                id: String::from(block.id()),
-                update_time: now.clone(),
-            });
+                              id: String::from(block.id()),
+                              update_time: now.clone(),
+                          });
         }
 
-        UpdateScheduler {
-            schedule: schedule
-        }
+        UpdateScheduler { schedule: schedule }
     }
 
     pub fn schedule(&mut self, task: Task) {
@@ -76,7 +74,7 @@ impl UpdateScheduler {
         let mut tasks_next = vec![t.clone()];
 
         while !self.schedule.is_empty() &&
-            t.update_time == self.schedule.peek().unwrap().update_time {
+              t.update_time == self.schedule.peek().unwrap().update_time {
             tasks_next.push(self.schedule.pop().unwrap())
         }
 
@@ -91,9 +89,9 @@ impl UpdateScheduler {
             if let Some(dur) = block_map.get_mut(&task.id).unwrap().update() {
                 self.schedule
                     .push(Task {
-                        id: task.id,
-                        update_time: now + dur,
-                    })
+                              id: task.id,
+                              update_time: now + dur,
+                          })
             }
         }
     }

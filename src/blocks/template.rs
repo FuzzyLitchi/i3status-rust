@@ -34,13 +34,12 @@ impl Template {
                 theme: theme,
             }
         }
-        
+
     }
 }
 
 
-impl Block for Template
-{
+impl Block for Template {
     fn update(&mut self) -> Option<Duration> {
         Some(self.update_interval.clone())
     }

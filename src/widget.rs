@@ -6,7 +6,7 @@ pub enum State {
     Info,
     Good,
     Warning,
-    Critical
+    Critical,
 }
 
 impl State {

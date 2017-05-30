@@ -36,8 +36,7 @@ impl Temperature {
 }
 
 
-impl Block for Temperature
-{
+impl Block for Temperature {
     fn update(&mut self) -> Option<Duration> {
         let output = Command::new("sensors")
             .args(&["-u"])
@@ -50,10 +49,10 @@ impl Block for Temperature
         for line in output.lines() {
             if line.starts_with("  temp") {
                 let rest = &line[6..]
-                    .split('_')
-                    .flat_map(|x| x.split(' '))
-                    .flat_map(|x| x.split('.'))
-                    .collect::<Vec<_>>();
+                                .split('_')
+                                .flat_map(|x| x.split(' '))
+                                .flat_map(|x| x.split('.'))
+                                .collect::<Vec<_>>();
 
                 if rest[1].starts_with("input") {
                     match rest[2].parse::<i64>() {
@@ -74,20 +73,22 @@ impl Block for Temperature
         if !temperatures.is_empty() {
             let max: i64 = *temperatures.iter().max().unwrap();
             let avg: i64 = (temperatures.iter().sum::<i64>() as f64 /
-                temperatures.len() as f64).round() as i64;
+                            temperatures.len() as f64)
+                    .round() as i64;
 
             self.output = format!("{}° avg, {}° max", avg, max);
             if !self.collapsed {
                 self.text.set_text(self.output.clone());
             }
 
-            self.text.set_state(match max {
-                0 ... 20 => State::Good,
-                20 ... 45 => State::Idle,
-                45 ... 60 => State::Info,
-                60 ... 80 => State::Warning,
-                _ => State::Critical
-            })
+            self.text
+                .set_state(match max {
+                               0...20 => State::Good,
+                               20...45 => State::Idle,
+                               45...60 => State::Info,
+                               60...80 => State::Warning,
+                               _ => State::Critical,
+                           })
         }
 
         Some(self.update_interval.clone())

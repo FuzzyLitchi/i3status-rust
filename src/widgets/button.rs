@@ -33,7 +33,9 @@ impl ButtonWidget {
     }
 
     pub fn with_icon(mut self, name: &str) -> Self {
-        self.icon = Some(String::from(self.theme["icons"][name].as_str().expect("Wrong icon identifier!")));
+        self.icon = Some(String::from(self.theme["icons"][name]
+                                          .as_str()
+                                          .expect("Wrong icon identifier!")));
         self.update();
         self
     }
@@ -56,7 +58,9 @@ impl ButtonWidget {
     }
 
     pub fn set_icon(&mut self, name: &str) {
-        self.icon = Some(String::from(self.theme["icons"][name].as_str().expect("Wrong icon identifier!")));
+        self.icon = Some(String::from(self.theme["icons"][name]
+                                          .as_str()
+                                          .expect("Wrong icon identifier!")));
         self.update();
     }
 
@@ -85,7 +89,9 @@ impl ButtonWidget {
 
 impl I3BarWidget for ButtonWidget {
     fn to_string(&self) -> String {
-        self.cached_output.clone().unwrap_or(self.rendered.to_string())
+        self.cached_output
+            .clone()
+            .unwrap_or(self.rendered.to_string())
     }
 
     fn get_rendered(&self) -> &Value {

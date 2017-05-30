@@ -26,12 +26,14 @@ impl TextWidget {
                 "color": "#000000"
             }),
             theme: theme,
-            cached_output: None
+            cached_output: None,
         }
     }
 
     pub fn with_icon(mut self, name: &str) -> Self {
-        self.icon = Some(String::from(self.theme["icons"][name].as_str().expect("Wrong icon identifier!")));
+        self.icon = Some(String::from(self.theme["icons"][name]
+                                          .as_str()
+                                          .expect("Wrong icon identifier!")));
         self.update();
         self
     }
@@ -54,7 +56,9 @@ impl TextWidget {
     }
 
     pub fn set_icon(&mut self, name: &str) {
-        self.icon = Some(String::from(self.theme["icons"][name].as_str().expect("Wrong icon identifier!")));
+        self.icon = Some(String::from(self.theme["icons"][name]
+                                          .as_str()
+                                          .expect("Wrong icon identifier!")));
         self.update();
     }
 
@@ -82,7 +86,9 @@ impl TextWidget {
 
 impl I3BarWidget for TextWidget {
     fn to_string(&self) -> String {
-        self.cached_output.clone().unwrap_or(self.rendered.to_string())
+        self.cached_output
+            .clone()
+            .unwrap_or(self.rendered.to_string())
     }
 
     fn get_rendered(&self) -> &Value {

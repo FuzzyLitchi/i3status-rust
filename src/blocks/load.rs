@@ -23,7 +23,9 @@ pub struct Load {
 
 impl Load {
     pub fn new(config: Value, theme: Value) -> Load {
-        let text = TextWidget::new(theme.clone()).with_icon("cogs").with_state(State::Info);
+        let text = TextWidget::new(theme.clone())
+            .with_icon("cogs")
+            .with_state(State::Info);
 
         let f = File::open("/proc/cpuinfo").expect("Your system doesn't support /proc/cpuinfo");
         let f = BufReader::new(f);
@@ -43,21 +45,23 @@ impl Load {
             id: Uuid::new_v4().simple().to_string(),
             logical_cores: logical_cores,
             update_interval: Duration::new(get_u64_default!(config, "interval", 3), 0),
-            format: FormatTemplate::from_string(get_str_default!(config, "format", "{1m}")).expect("Invalid format specified for load"),
-            text: text
+            format: FormatTemplate::from_string(get_str_default!(config, "format", "{1m}"))
+                .expect("Invalid format specified for load"),
+            text: text,
         }
     }
 }
 
-impl Block for Load
-{
+impl Block for Load {
     fn update(&mut self) -> Option<Duration> {
-        let mut f = OpenOptions::new()
-            .read(true)
-            .open("/proc/loadavg")
-            .expect("Your system does not support reading the load average from /proc/loadavg");
+        let mut f =
+            OpenOptions::new()
+                .read(true)
+                .open("/proc/loadavg")
+                .expect("Your system does not support reading the load average from /proc/loadavg");
         let mut loadavg = String::new();
-        f.read_to_string(&mut loadavg).expect("Failed to read the load average of your system!");
+        f.read_to_string(&mut loadavg)
+            .expect("Failed to read the load average of your system!");
 
         let split: Vec<&str> = (&loadavg).split(" ").collect();
 
@@ -66,13 +70,13 @@ impl Block for Load
                           "{15m}" => split[2]);
 
         let used_perc = values["{1m}"].parse::<f32>().unwrap() / self.logical_cores as f32;
-        self.text.set_state(
-            match  used_perc {
-                0. ... 0.3 => State::Idle,
-                0.3 ... 0.6 => State::Info,
-                0.6 ... 0.9 => State::Warning,
-                _ => State::Critical
-        });
+        self.text
+            .set_state(match used_perc {
+                           0....0.3 => State::Idle,
+                           0.3...0.6 => State::Info,
+                           0.6...0.9 => State::Warning,
+                           _ => State::Critical,
+                       });
 
         self.text.set_text(self.format.render_static_str(&values));
 

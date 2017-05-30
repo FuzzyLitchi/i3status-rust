@@ -94,10 +94,13 @@ fn main() {
     let matches = builder.get_matches();
 
     // Load all arguments
-    let input_check_interval = Duration::new(0, matches.value_of("input-check-interval")
-                                                .unwrap()
-                                                .parse::<u32>()
-                                                .expect("Not a valid integer as interval") * 1000000);
+    let input_check_interval = Duration::new(0,
+                                             matches
+                                                 .value_of("input-check-interval")
+                                                 .unwrap()
+                                                 .parse::<u32>()
+                                                 .expect("Not a valid integer as interval") *
+                                             1000000);
 
     // Merge the selected icons and color theme
     let icons = get_icons(matches.value_of("icons").unwrap());
@@ -136,7 +139,9 @@ fn main() {
         for block in b {
             let name = block["block"].clone();
             blocks.push(create_block(name.as_str().expect("block name must be a string"),
-                                           block, tx.clone(), &theme))
+                                     block,
+                                     tx.clone(),
+                                     &theme))
         }
     } else {
         println!("The configs outer layer must be an array! For example: []")
@@ -195,7 +200,11 @@ fn profile(iterations: i32, name: &str, block: &mut Block) {
     println!("Now profiling the {0} block by executing {1} updates.\n \
               Use pprof to analyze {0}.profile later.", name, iterations);
 
-    PROFILER.lock().unwrap().start(format!("./{}.profile", name)).unwrap();
+    PROFILER
+        .lock()
+        .unwrap()
+        .start(format!("./{}.profile", name))
+        .unwrap();
 
     bar.set_job_title("Profiling...");
 
