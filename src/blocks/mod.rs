@@ -39,12 +39,11 @@ use std::sync::mpsc::Sender;
 
 macro_rules! boxed ( { $b:expr } => { Box::new($b) as Box<Block> }; );
 
-pub fn create_block(name: &str,
-                    config: Value,
+pub fn create_block(config: Value,
                     tx_update_request: Sender<Task>,
                     theme: &Value)
                     -> Box<Block> {
-    match name {
+    match config["block"].as_str().unwrap() {
         "time" => boxed!(Time::new(config, theme.clone())),
         "template" => boxed!(Template::new(config, tx_update_request, theme.clone())),
         "music" => boxed!(Music::new(config, tx_update_request, theme)),
@@ -59,7 +58,7 @@ pub fn create_block(name: &str,
         "sound" => boxed!(Sound::new(config, theme.clone())),
         "temperature" => boxed!(Temperature::new(config, theme.clone())),
         "focused_window" => boxed!(FocusedWindow::new(config, tx_update_request, theme.clone())),
-        _ => {
+        name => {
             panic!("Not a registered block: {}", name);
         }
     }

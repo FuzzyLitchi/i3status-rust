@@ -17,6 +17,7 @@ pub mod blocks;
 pub mod input;
 pub mod icons;
 pub mod themes;
+mod config;
 pub mod scheduler;
 pub mod widget;
 pub mod widgets;
@@ -41,6 +42,7 @@ use blocks::create_block;
 use input::{process_events, I3barEvent};
 use scheduler::{UpdateScheduler, Task};
 use themes::get_theme;
+use config::Config;
 use icons::get_icons;
 
 use util::get_file;
@@ -107,13 +109,10 @@ fn main() {
     let mut theme = get_theme(matches.value_of("theme").unwrap()).expect("Not a valid theme!");
     theme["icons"] = icons;
 
-    // Load the config file
-    let config_str = get_file(matches.value_of("config").unwrap());
-
-    // Create the blocks specified
-    let config = serde_json::from_str(&config_str).expect("Config file is not valid JSON!");
-
     let (tx, rx_update_requests): (Sender<Task>, Receiver<Task>) = mpsc::channel();
+
+    // Load the config file
+    let config = Config::new(matches.value_of("config").unwrap(), &tx, &theme);
 
     #[cfg(debug_assertions)]
     if_debug!({
@@ -133,19 +132,7 @@ fn main() {
         }
     });
 
-    let mut blocks: Vec<Box<Block>> = Vec::new();
-
-    if let Value::Array(b) = config {
-        for block in b {
-            let name = block["block"].clone();
-            blocks.push(create_block(name.as_str().expect("block name must be a string"),
-                                     block,
-                                     tx.clone(),
-                                     &theme))
-        }
-    } else {
-        println!("The configs outer layer must be an array! For example: []")
-    }
+    let mut blocks: Vec<Box<Block>> = config.blocks;
 
     let order = blocks.iter().map(|x| String::from(x.id())).collect();
 
