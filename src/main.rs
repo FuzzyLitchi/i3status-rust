@@ -126,7 +126,7 @@ fn main() {
                     return;
                 }
             }
-            } else {
+        } else {
                 println!("The configs outer layer must be an array! For example: []")
             }
         }

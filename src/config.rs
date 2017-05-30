@@ -21,7 +21,7 @@ impl Config {
                 for block in b {
                     blocks.push(create_block(block,
                                              tx.clone(),
-                                             &theme))
+                                             theme.clone()))
                 }
                 Config {
                     blocks

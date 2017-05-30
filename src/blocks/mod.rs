@@ -41,23 +41,23 @@ macro_rules! boxed ( { $b:expr } => { Box::new($b) as Box<Block> }; );
 
 pub fn create_block(config: Value,
                     tx_update_request: Sender<Task>,
-                    theme: &Value)
+                    theme: Value)
                     -> Box<Block> {
     match config["block"].as_str().unwrap() {
-        "time" => boxed!(Time::new(config, theme.clone())),
-        "template" => boxed!(Template::new(config, tx_update_request, theme.clone())),
+        "time" => boxed!(Time::new(config, theme)),
+        "template" => boxed!(Template::new(config, tx_update_request, theme)),
         "music" => boxed!(Music::new(config, tx_update_request, theme)),
-        "load" => boxed!(Load::new(config, theme.clone())),
-        "memory" => boxed!(Memory::new(config, tx_update_request, theme.clone())),
-        "cpu" => boxed!(Cpu::new(config, theme.clone())),
-        "pacman" => boxed!(Pacman::new(config, theme.clone())),
-        "battery" => boxed!(Battery::new(config, theme.clone())),
-        "custom" => boxed!(Custom::new(config, tx_update_request, theme.clone())),
-        "disk_space" => boxed!(DiskSpace::new(config, theme.clone())),
-        "toggle" => boxed!(Toggle::new(config, theme.clone())),
-        "sound" => boxed!(Sound::new(config, theme.clone())),
-        "temperature" => boxed!(Temperature::new(config, theme.clone())),
-        "focused_window" => boxed!(FocusedWindow::new(config, tx_update_request, theme.clone())),
+        "load" => boxed!(Load::new(config, theme)),
+        "memory" => boxed!(Memory::new(config, tx_update_request, theme)),
+        "cpu" => boxed!(Cpu::new(config, theme)),
+        "pacman" => boxed!(Pacman::new(config, theme)),
+        "battery" => boxed!(Battery::new(config, theme)),
+        "custom" => boxed!(Custom::new(config, tx_update_request, theme)),
+        "disk_space" => boxed!(DiskSpace::new(config, theme)),
+        "toggle" => boxed!(Toggle::new(config, theme)),
+        "sound" => boxed!(Sound::new(config, theme)),
+        "temperature" => boxed!(Temperature::new(config, theme)),
+        "focused_window" => boxed!(FocusedWindow::new(config, tx_update_request, theme)),
         name => {
             panic!("Not a registered block: {}", name);
         }
