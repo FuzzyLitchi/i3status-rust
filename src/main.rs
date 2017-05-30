@@ -22,13 +22,6 @@ pub mod scheduler;
 pub mod widget;
 pub mod widgets;
 
-#[cfg(debug_assertions)]
-extern crate cpuprofiler;
-#[cfg(debug_assertions)]
-use cpuprofiler::PROFILER;
-#[cfg(debug_assertions)]
-extern crate progress;
-
 use std::sync::mpsc::{Sender, Receiver};
 use std::sync::mpsc;
 use std::thread;
