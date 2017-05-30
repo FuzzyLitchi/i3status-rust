@@ -17,7 +17,8 @@ impl Config {
 
         match config {
             serde_json::Value::Array(b) => {
-                let blocks = Vec::new();
+                let mut blocks = Vec::new();
+                
                 for block in b {
                     blocks.push(create_block(block,
                                              tx.clone(),

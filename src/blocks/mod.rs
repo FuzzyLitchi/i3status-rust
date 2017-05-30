@@ -43,7 +43,7 @@ pub fn create_block(config: Value,
                     tx_update_request: Sender<Task>,
                     theme: Value)
                     -> Box<Block> {
-    match config["block"].as_str().unwrap() {
+    match config.clone()["block"].as_str().unwrap() {
         "time" => boxed!(Time::new(config, theme)),
         "template" => boxed!(Template::new(config, tx_update_request, theme)),
         "music" => boxed!(Music::new(config, tx_update_request, theme)),

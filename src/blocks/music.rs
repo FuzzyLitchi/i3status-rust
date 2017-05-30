@@ -28,7 +28,7 @@ pub struct Music {
 }
 
 impl Music {
-    pub fn new(config: Value, send: Sender<Task>, theme: &Value) -> Music {
+    pub fn new(config: Value, send: Sender<Task>, theme: Value) -> Music {
         let id: String = Uuid::new_v4().simple().to_string();
         let id_copy = id.clone();
 

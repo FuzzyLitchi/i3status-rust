@@ -114,24 +114,6 @@ fn main() {
     // Load the config file
     let config = Config::new(matches.value_of("config").unwrap(), &tx, &theme);
 
-    #[cfg(debug_assertions)]
-    if_debug!({
-        if matches.value_of("profile").is_some() {
-            if let Value::Array(ref b) = config {
-            for block in b {
-                let name = block["block"].clone().as_str().expect("block name must be a string").to_owned();
-                if name == matches.value_of("profile").unwrap() {
-                    let mut block = create_block(&name, block.clone(), tx.clone(), &theme);
-                    profile(matches.value_of("profile-runs").unwrap().parse::<i32>().unwrap(), &name, block.deref_mut());
-                    return;
-                }
-            }
-        } else {
-                println!("The configs outer layer must be an array! For example: []")
-            }
-        }
-    });
-
     let mut blocks: Vec<Box<Block>> = config.blocks;
 
     let order = blocks.iter().map(|x| String::from(x.id())).collect();
@@ -179,26 +161,4 @@ fn main() {
             }
         }
     }
-}
-
-#[cfg(debug_assertions)]
-fn profile(iterations: i32, name: &str, block: &mut Block) {
-    let mut bar = progress::Bar::new();
-    println!("Now profiling the {0} block by executing {1} updates.\n \
-              Use pprof to analyze {0}.profile later.", name, iterations);
-
-    PROFILER
-        .lock()
-        .unwrap()
-        .start(format!("./{}.profile", name))
-        .unwrap();
-
-    bar.set_job_title("Profiling...");
-
-    for i in 0..iterations {
-        block.update();
-        bar.reach_percent(((i as f64 / iterations as f64) * 100.).round() as i32);
-    }
-
-    PROFILER.lock().unwrap().stop().unwrap();
 }
