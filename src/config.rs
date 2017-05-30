@@ -18,18 +18,13 @@ impl Config {
         match config {
             serde_json::Value::Array(b) => {
                 let mut blocks = Vec::new();
-                
+
                 for block in b {
-                    blocks.push(create_block(block,
-                                             tx.clone(),
-                                             theme.clone()))
+                    blocks.push(create_block(block, tx.clone(), theme.clone()))
                 }
-                Config {
-                    blocks
-                }
-            },
+                Config { blocks }
+            }
             _ => panic!("Config file doesn't have an array as the outmost value and is therefor invalid!"),
         }
     }
-
 }
