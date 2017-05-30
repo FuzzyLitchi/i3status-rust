@@ -1,4 +1,5 @@
 [
+  {"block": "music", "player": "spotify", "buttons": ["prev", "play", "next"]},
   {"block": "disk_space", "path": "/", "alias": "/", "type": "available", "unit": "GB", "interval": 20},
   {"block": "memory", "type":"memory", "format_mem":"{Mup}%", "format_swap":"{SUp}%"},
   {"block": "cpu", "interval": 1},

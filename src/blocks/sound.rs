@@ -38,30 +38,7 @@ const FILTER: &[char] = &['[', ']', '%'];
 
 impl Block for Sound {
     fn update(&mut self) -> Option<Duration> {
-        let output = Command::new("amixer")
-            .args(&["get", "Master"])
-            .output()
-            .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_owned());
-
-        if let Ok(output) = output {
-            let last = (&output)
-                .lines()
-                .into_iter()
-                .last()
-                .unwrap()
-                .split_whitespace()
-                .into_iter()
-                .filter(|x| x.starts_with('[') && !x.contains("dB"))
-                .map(|s| s.trim_matches(FILTER))
-                .collect::<Vec<&str>>();
-
-            let volume = last[0].parse::<u64>().unwrap();
-            let muted = match last[1] {
-                "on" => false,
-                "off" => true,
-                _ => false,
-            };
-
+        if let Some((volume, muted)) = get_audio_details() {
             if muted {
                 self.text.set_icon("volume_empty");
                 self.text
@@ -95,15 +72,67 @@ impl Block for Sound {
     fn click(&mut self, e: &I3barEvent) {
         if let Some(ref name) = e.name {
             if name.as_str() == self.id {
-                Command::new("amixer")
-                    .args(&["set", "Master", "toggle"])
-                    .output()
-                    .ok();
-                self.update();
+                if let Some((_, muted)) = get_audio_details() {
+                    match muted {
+                        true => {
+                            //is already muted so unmute it
+                            Command::new("amixer")
+                                .args(&["set", "Master", "on"])
+                                .output()
+                                .ok();
+                            Command::new("amixer")
+                                .args(&["set", "Headphone", "on"])
+                                .output()
+                                .ok();
+                            Command::new("amixer")
+                                .args(&["set", "Front", "on"])
+                                .output()
+                                .ok();
+                            self.update();
+                        }
+                        false => {
+                            //is unmuted so mute it
+                            Command::new("amixer")
+                                .args(&["set", "Master", "off"])
+                                .output()
+                                .ok();
+                            self.update();
+                        }
+                    }
+                }
             }
         }
     }
     fn id(&self) -> &str {
         &self.id
+    }
+}
+
+fn get_audio_details() -> Option<(u64, bool)> {
+    let output = Command::new("amixer")
+        .args(&["get", "Master"])
+        .output()
+        .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_owned());
+
+    if let Ok(output) = output {
+        let last = (&output)
+            .lines()
+            .into_iter()
+            .last()
+            .unwrap()
+            .split_whitespace()
+            .into_iter()
+            .filter(|x| x.starts_with('[') && !x.contains("dB"))
+            .map(|s| s.trim_matches(FILTER))
+            .collect::<Vec<&str>>();
+
+        Some((last[0].parse::<u64>().unwrap(),
+              match last[1] {
+                  "on" => false,
+                  "off" => true,
+                  _ => false,
+              }))
+    } else {
+        None
     }
 }
